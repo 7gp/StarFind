@@ -1,7 +1,8 @@
 {
   "name": "StarFind",
-  "description": "A tool for reporting shooting stars in RuneScape.",
+  "description": "A tool for detecting and reporting shooting stars in RuneScape.",
   "version": "1.0.0",
   "homepage": "http://osrs.us/StarFind/",
-  "entry": "http://osrs.us/StarFind/index.html"
+  "entry": "http://osrs.us/StarFind/index.html",
+  "permissions": ["pixel"]
 }
