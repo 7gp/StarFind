@@ -1,8 +1,7 @@
 const webhookURL = "https://discord.com/api/webhooks/1333176484793290825/XoT2Ei0p-4Wz8-1HCP7-Z3QKPWanbJSNoVEE52nNvrCpEZFYRidtd_SneIrGip2RsvHa";
 let monitoring = false;
-let starReports = [];
 
-// Start monitoring chat for shooting stars
+// Start monitoring chat for portable telescope messages
 document.getElementById("startMonitoring").addEventListener("click", () => {
     if (!alt1 || !alt1.permissionPixel) {
         alert("Please run this app in the Alt1 Toolkit with screen capture permissions enabled!");
@@ -22,8 +21,9 @@ document.getElementById("startMonitoring").addEventListener("click", () => {
         const chatData = alt1.chatbox.read();
         if (chatData && chatData.messages) {
             chatData.messages.forEach((message) => {
-                if (message.text.includes("shooting star")) {
-                    processStarMessage(message.text);
+                // Detect portable telescope message
+                if (message.text.includes("The star is visible in") && message.text.includes("and will land in")) {
+                    displayTelescopeInfo(message.text);
                 }
             });
         }
@@ -37,58 +37,39 @@ document.getElementById("stopMonitoring").addEventListener("click", () => {
     document.getElementById("stopMonitoring").disabled = true;
 });
 
-// Process detected star message
-function processStarMessage(text) {
-    const starRegex = /shooting star\s+in\s+(World \d+)\s+at\s+(.+)\s+at\s+(.+)/i;
-    const match = text.match(starRegex);
+// Process and display telescope info
+function displayTelescopeInfo(chatMessage) {
+    const telescopeRegex = /The star is visible in (.+) and will land in (.+)/i;
+    const match = chatMessage.match(telescopeRegex);
 
     if (match) {
-        const [_, world, location, time] = match;
+        const [_, location, time] = match;
 
-        // Check for duplicates
-        const existingReport = starReports.find((r) => r.world === world && r.location === location);
-        if (!existingReport) {
-            starReports.push({ world, location, time });
+        // Display the info on the page
+        const starList = document.getElementById("stars");
+        const li = document.createElement("li");
+        li.textContent = `Location: ${location}, Time: ${time}`;
+        starList.appendChild(li);
 
-            // Update the UI
-            const starList = document.getElementById("stars");
-            const li = document.createElement("li");
-            li.textContent = `${world}: ${location} at ${time}`;
-            starList.appendChild(li);
-
-            document.getElementById("sendToDiscord").disabled = false;
-        }
+        // Optional: Send the information to Discord
+        sendToDiscord(`🌟 Shooting Star Alert 🌟\nLocation: ${location}\nLanding in: ${time}`);
     }
 }
 
-// Send the list to Discord
-document.getElementById("sendToDiscord").addEventListener("click", () => {
-    if (starReports.length === 0) {
-        alert("No star reports to send!");
-        return;
-    }
-
-    const message = {
-        content: "**🌟 Shooting Star Alerts 🌟**\n" + starReports.map(
-            (star) => `- **${star.world}**: ${star.location} at ${star.time}`
-        ).join("\n"),
-    };
-
+// Send telescope info to Discord
+function sendToDiscord(message) {
     fetch(webhookURL, {
         method: "POST",
         headers: { "Content-Type": "application/json" },
-        body: JSON.stringify(message),
+        body: JSON.stringify({ content: message }),
     })
         .then((response) => {
             if (!response.ok) {
                 throw new Error(`Failed to send webhook: ${response.statusText}`);
             }
-            alert("Star list sent to Discord!");
-            starReports = [];
-            document.getElementById("stars").innerHTML = "";
-            document.getElementById("sendToDiscord").disabled = true;
+            console.log("Message sent to Discord:", message);
         })
         .catch((error) => {
             console.error("Error sending webhook:", error.message);
         });
-});
+}
