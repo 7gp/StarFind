@@ -1,25 +1,22 @@
-<!DOCTYPE html>
-<html lang="en">
-<head>
-    <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Alt1 Shooting Star Reporter</title>
-    <script src="app.js" defer></script>
-    <link rel="stylesheet" href="styles.css">
-</head>
-<body>
-    <div id="app">
-        <h1>Alt1 Shooting Star Reporter</h1>
-        <p>Report shooting stars directly to Discord!</p>
-        <div>
-            <label for="starLocation">Star Location:</label>
-            <input type="text" id="starLocation" placeholder="Enter location (e.g., Falador)">
-        </div>
-        <div>
-            <label for="starTime">Time (Game Time):</label>
-            <input type="time" id="starTime">
-        </div>
-        <button id="sendToDiscord">Send to Discord</button>
+<div id="app">
+    <h1>Alt1 Shooting Star Reporter</h1>
+    <p>Report shooting stars directly to Discord!</p>
+    <div>
+        <label for="starWorld">World:</label>
+        <input type="number" id="starWorld" placeholder="Enter world (e.g., 1)" min="1">
     </div>
-</body>
-</html>
+    <div>
+        <label for="starLocation">Location:</label>
+        <input type="text" id="starLocation" placeholder="Enter location (e.g., Falador)">
+    </div>
+    <div>
+        <label for="starTime">Time (Game Time):</label>
+        <input type="time" id="starTime">
+    </div>
+    <button id="addStar">Add to List</button>
+    <button id="sendToDiscord">Send List to Discord</button>
+    <div id="starList">
+        <h2>Reported Stars</h2>
+        <ul id="stars"></ul>
+    </div>
+</div>
