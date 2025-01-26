@@ -3,6 +3,7 @@ let monitoring = false;
 
 // Start monitoring chat for portable telescope messages
 document.getElementById("startMonitoring").addEventListener("click", () => {
+    console.log("Start Monitoring clicked");
     if (!alt1 || !alt1.permissionPixel) {
         alert("Please run this app in the Alt1 Toolkit with screen capture permissions enabled!");
         return;
@@ -32,6 +33,7 @@ document.getElementById("startMonitoring").addEventListener("click", () => {
 
 // Stop monitoring chat
 document.getElementById("stopMonitoring").addEventListener("click", () => {
+    console.log("Stop Monitoring clicked");
     monitoring = false;
     document.getElementById("startMonitoring").disabled = false;
     document.getElementById("stopMonitoring").disabled = true;
@@ -39,7 +41,7 @@ document.getElementById("stopMonitoring").addEventListener("click", () => {
 
 // Process and display telescope info
 function displayTelescopeInfo(chatMessage) {
-    const telescopeRegex = /The star is visible in (.+) and will land in (.+)/i;
+    const telescopeRegex = /The star is visible in (.+?) and will land in (.+)/i;
     const match = chatMessage.match(telescopeRegex);
 
     if (match) {
