@@ -1,10 +1,12 @@
 {
-  "name": "StarFind",
   "appName": "StarFind",
   "description": "A tool for detecting and reporting shooting stars in RuneScape.",
-  "version": "1.0.0",
-  "homepage": "http://osrs.us/StarFind/",
-  "entry": "http://osrs.us/StarFind/index.html",
-  "permissions": "pixel,overlay",
-  "iconUrl": "http://osrs.us/StarFind/icon.png"
+  "appUrl": "./index.html",
+  "configUrl": "./appconfig.json",
+  "iconUrl": "./icon.png",
+  "defaultWidth": 400,
+  "defaultHeight": 600,
+  "minWidth": 300,
+  "minHeight": 200,
+  "permissions": "pixel,overlay"
 }
