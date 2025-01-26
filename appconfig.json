@@ -4,5 +4,4 @@
   "version": "1.0.0",
   "homepage": "http://osrs.us/StarFind/",
   "entry": "http://osrs.us/StarFind/index.html",
-  "permissions": ["pixel"]
 }
