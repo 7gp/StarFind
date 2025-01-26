@@ -2,7 +2,7 @@
   "name": "StarFind",
   "description": "A tool for detecting and reporting shooting stars in RuneScape.",
   "version": "1.0.0",
-  "homepage": "http://localhost:1273/",
-  "entry": "http://localhost:1273/index.html",
+  "homepage": "http://osrs.us/StarFind/",
+  "entry": "http://osrs.us/StarFind/index.html",
   "permissions": ["screen"]
 }
