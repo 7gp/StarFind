@@ -4,5 +4,5 @@
   "version": "1.0.0",
   "homepage": "http://localhost:1273/",
   "entry": "http://localhost:1273/index.html",
-  "permissions": ["screen"]  // Replace "pixel" with "screen"
+  "permissions": ["screen"]
 }
