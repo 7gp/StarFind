@@ -1,92 +1,94 @@
-const webhookURL = "https://discord.com/api/webhooks/1333176484793290825/XoT2Ei0p-4Wz8-1HCP7-Z3QKPWanbJSNoVEE52nNvrCpEZFYRidtd_SneIrGip2RsvHa";
+const webhookURL = "YOUR_DISCORD_WEBHOOK_URL"; // Replace with your webhook URL
+let monitoring = false;
 let starReports = [];
-let captureInterval = null;
 
-// Start capturing chat
-document.getElementById('startCapture').addEventListener('click', () => {
-    if (!window.alt1) {
-        alert('Please run this app in the Alt1 Toolkit!');
+// Start monitoring chat for shooting stars
+document.getElementById("startMonitoring").addEventListener("click", () => {
+    if (!alt1 || !alt1.permissionPixel) {
+        alert("Please run this app in the Alt1 Toolkit with screen capture permissions enabled!");
         return;
     }
 
-    if (!alt1.permissionPixel) {
-        alert('Alt1 does not have permission to capture your screen!');
-        return;
-    }
+    monitoring = true;
+    document.getElementById("startMonitoring").disabled = true;
+    document.getElementById("stopMonitoring").disabled = false;
 
-    document.getElementById('startCapture').disabled = true;
-    document.getElementById('stopCapture').disabled = false;
+    const monitorInterval = setInterval(() => {
+        if (!monitoring) {
+            clearInterval(monitorInterval);
+            return;
+        }
 
-    captureInterval = setInterval(() => {
-        const chat = alt1.chatbox.read();
-        if (chat) {
-            chat.messages.forEach((msg) => {
-                if (msg.text.includes("shooting star")) {
-                    processStarMessage(msg.text);
+        const chatData = alt1.chatbox.read();
+        if (chatData && chatData.messages) {
+            chatData.messages.forEach((message) => {
+                if (message.text.includes("shooting star")) {
+                    processStarMessage(message.text);
                 }
             });
         }
-    }, 1000);
+    }, 1000); // Poll every second
 });
 
-// Stop capturing chat
-document.getElementById('stopCapture').addEventListener('click', () => {
-    clearInterval(captureInterval);
-    document.getElementById('startCapture').disabled = false;
-    document.getElementById('stopCapture').disabled = true;
+// Stop monitoring chat
+document.getElementById("stopMonitoring").addEventListener("click", () => {
+    monitoring = false;
+    document.getElementById("startMonitoring").disabled = false;
+    document.getElementById("stopMonitoring").disabled = true;
 });
 
-// Process detected star messages
+// Process detected star message
 function processStarMessage(text) {
     const starRegex = /shooting star\s+in\s+(World \d+)\s+at\s+(.+)\s+at\s+(.+)/i;
     const match = text.match(starRegex);
 
     if (match) {
-        const world = match[1];
-        const location = match[2];
-        const time = match[3];
+        const [_, world, location, time] = match;
 
+        // Check for duplicates
         const existingReport = starReports.find((r) => r.world === world && r.location === location);
         if (!existingReport) {
             starReports.push({ world, location, time });
 
-            // Update list
-            const starList = document.getElementById('stars');
-            const li = document.createElement('li');
+            // Update the UI
+            const starList = document.getElementById("stars");
+            const li = document.createElement("li");
             li.textContent = `${world}: ${location} at ${time}`;
             starList.appendChild(li);
 
-            document.getElementById('sendToDiscord').disabled = false;
+            document.getElementById("sendToDiscord").disabled = false;
         }
     }
 }
 
 // Send the list to Discord
-document.getElementById('sendToDiscord').addEventListener('click', () => {
+document.getElementById("sendToDiscord").addEventListener("click", () => {
     if (starReports.length === 0) {
-        alert('No star reports to send!');
+        alert("No star reports to send!");
         return;
     }
 
     const message = {
-        content: '**🌟 Shooting Star Alerts 🌟**\n' +
-            starReports.map((star) => `- **${star.world}**: ${star.location} at ${star.time}`).join('\n'),
+        content: "**🌟 Shooting Star Alerts 🌟**\n" + starReports.map(
+            (star) => `- **${star.world}**: ${star.location} at ${star.time}`
+        ).join("\n"),
     };
 
     fetch(webhookURL, {
-        method: 'POST',
-        headers: { 'Content-Type': 'application/json' },
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
         body: JSON.stringify(message),
     })
         .then((response) => {
-            if (response.ok) {
-                alert('Star list sent to Discord!');
-                starReports = [];
-                document.getElementById('stars').innerHTML = '';
-                document.getElementById('sendToDiscord').disabled = true;
-            } else {
-                alert('Failed to send to Discord. Check your webhook URL.');
+            if (!response.ok) {
+                throw new Error(`Failed to send webhook: ${response.statusText}`);
             }
+            alert("Star list sent to Discord!");
+            starReports = [];
+            document.getElementById("stars").innerHTML = "";
+            document.getElementById("sendToDiscord").disabled = true;
         })
-        .catch((error) => console.error('Error:', error));
+        .catch((error) => {
+            console.error("Error sending webhook:", error.message);
+        });
 });
