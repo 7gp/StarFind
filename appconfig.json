@@ -1,5 +1,6 @@
 {
   "name": "StarFind",
+  "appName": "StarFind",
   "description": "A tool for detecting and reporting shooting stars in RuneScape.",
   "version": "1.0.0",
   "homepage": "http://osrs.us/StarFind/",
