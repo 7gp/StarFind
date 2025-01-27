@@ -5,6 +5,7 @@ A1lib.identifyApp("appconfig.json"); // Identify the app
 let stars = [];
 let monitoring = false;
 const webhookURL = "https://discord.com/api/webhooks/1333176484793290825/XoT2Ei0p-4Wz8-1HCP7-Z3QKPWanbJSNoVEE52nNvrCpEZFYRidtd_SneIrGip2RsvHa";
+let dialogReader = new DialogTextReader();
 
 document.getElementById("startMonitoring").addEventListener("click", () => {
     console.log("Start Monitoring button clicked");
@@ -20,9 +21,8 @@ document.getElementById("startMonitoring").addEventListener("click", () => {
             return;
         }
 
-        console.log("Scanning the screen...");
-        detectGameText();
-    }, 1000);
+        detectDialog(); // Check for dialog text
+    }, 1000); // Poll every second
 });
 
 document.getElementById("stopMonitoring").addEventListener("click", () => {
@@ -33,48 +33,39 @@ document.getElementById("stopMonitoring").addEventListener("click", () => {
     document.getElementById("stopMonitoring").disabled = true;
 });
 
-function detectGameText() {
-    console.log("detectGameText called");
+function detectDialog() {
+    console.log("Checking for dialog...");
+    if (!dialogReader.pos) {
+        dialogReader.find();
+        console.log("Dialog reader initialized:", dialogReader.pos);
+    }
 
-    const gameSize = alt1.getAppSize();
-    console.log("Game size detected:", gameSize);
+    const dialogText = dialogReader.read();
+    if (dialogText) {
+        console.log("Dialog detected:", dialogText);
 
-    const image = alt1.captureRect({
-        x: 0,
-        y: 0,
-        width: gameSize.width,
-        height: gameSize.height,
-    });
-
-    if (image) {
-        console.log("Captured screen successfully.");
-        const detectedText = alt1.ocr.read(image);
-        console.log("Detected Text:", detectedText);
-
+        // Use regex to extract shooting star details
         const starRegex = /The star is visible in (.+?) and will land in (.+?) minutes\..*The star looks to be a size (\d+)/i;
-        const starMatch = detectedText.match(starRegex);
+        const match = dialogText.match(starRegex);
 
-        if (starMatch) {
-            console.log("Star Match Found:", starMatch);
-            const [_, location, time, size] = starMatch;
-            const world = detectCurrentWorld(detectedText);
-
+        if (match) {
+            const [_, location, time, size] = match;
+            const world = detectCurrentWorld(dialogText);
             if (world) {
                 addStarData(world, location, time, size);
             } else {
-                console.log("World not detected in the text.");
+                console.log("World not detected in the dialog.");
             }
         } else {
-            console.log("No star-related text detected.");
+            console.log("No shooting star information in the dialog.");
         }
     } else {
-        console.error("Failed to capture screen.");
+        console.log("No dialog detected.");
     }
 }
 
 function detectCurrentWorld(text) {
-    console.log("detectCurrentWorld called");
-
+    console.log("Detecting world...");
     const worldRegex = /RuneScape (\d+)/i;
     const worldMatch = text.match(worldRegex);
 
@@ -84,7 +75,7 @@ function detectCurrentWorld(text) {
         return world;
     }
 
-    console.log("World not detected in the text.");
+    console.log("World not detected in the dialog.");
     return null;
 }
 
