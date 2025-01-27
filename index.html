@@ -7,23 +7,21 @@
     <script src="app.js" defer></script>
     <link rel="stylesheet" href="styles.css">
     <script>
-        // Identify the app's configuration file to Alt1
         if (window.alt1) {
-            alt1.identifyAppUrl("http://osrs.us/StarFind/appconfig.json");
+            alt1.identifyAppUrl("./appconfig.json");
         }
     </script>
 </head>
 <body>
     <div id="app">
         <h1>StarFind</h1>
-        <p>Detect and report shooting stars automatically from RuneScape chat!</p>
+        <p>Detect and report shooting stars automatically from RuneScape!</p>
         <button id="startMonitoring">Start Monitoring</button>
         <button id="stopMonitoring" disabled>Stop Monitoring</button>
         <div id="starList">
             <h2>Detected Stars</h2>
             <ul id="stars"></ul>
         </div>
-        <button id="sendToDiscord" disabled>Send to Discord</button>
     </div>
 </body>
 </html>
