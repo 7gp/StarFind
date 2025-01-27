@@ -4,20 +4,40 @@
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>StarFind</title>
-    <script src="alt1lib.js"></script> <!-- Alt1 Library -->
+    <!-- Load Alt1 Library -->
+    <script src="alt1lib.js"></script>
     <script>
-        // Verify if A1lib (Alt1 Library) is loaded
         if (typeof A1lib !== "undefined") {
-            console.debug("Alt1lib.js loaded successfully");
+            console.debug("alt1lib.js loaded successfully");
         } else {
-            console.error("Alt1lib.js is not defined");
+            console.error("alt1lib.js is not defined");
         }
     </script>
-    <script src="dialogtext.js"></script> <!-- Dialog Text Detection -->
+    <!-- Polyfill for ImageData.fromBase64 -->
+    <script>
+        if (!ImageData.fromBase64) {
+            ImageData.fromBase64 = function (base64, width, height) {
+                try {
+                    const binary = atob(base64);
+                    const length = binary.length;
+                    const data = new Uint8ClampedArray(length);
+                    for (let i = 0; i < length; i++) {
+                        data[i] = binary.charCodeAt(i);
+                    }
+                    return new ImageData(data, width, height);
+                } catch (error) {
+                    console.error("Invalid Base64 string:", base64, error);
+                    return null;
+                }
+            };
+        }
+    </script>
+    <!-- Load Dialog Text Library -->
+    <script src="dialogtext.js"></script>
+    <!-- Load Main App Script -->
     <script src="app.js" defer></script>
     <link rel="stylesheet" href="styles.css">
     <script>
-        // Identify the app with Alt1
         if (window.alt1) {
             alt1.identifyAppUrl("./appconfig.json");
         }
