@@ -1,6 +1,6 @@
-console.log("app.js loaded successfully"); // Confirm script is loaded
+console.log("app.js loaded successfully"); // Confirm the script is loaded
 
-A1lib.identifyApp("appconfig.json");
+A1lib.identifyApp("appconfig.json"); // Identify the app
 
 let stars = [];
 let monitoring = false;
@@ -34,7 +34,7 @@ document.getElementById("stopMonitoring").addEventListener("click", () => {
 });
 
 function detectGameText() {
-    console.log("DetectGameText called");
+    console.log("detectGameText called");
 
     const gameSize = alt1.getAppSize();
     console.log("Game size detected:", gameSize);
@@ -73,7 +73,7 @@ function detectGameText() {
 }
 
 function detectCurrentWorld(text) {
-    console.log("DetectCurrentWorld called");
+    console.log("detectCurrentWorld called");
 
     const worldRegex = /RuneScape (\d+)/i;
     const worldMatch = text.match(worldRegex);
