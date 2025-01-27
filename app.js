@@ -2,8 +2,7 @@ A1lib.identifyApp("appconfig.json");
 
 let stars = []; // Array to store star data
 let monitoring = false;
-const webhookURL = "https://discord.com/api/webhooks/1333176484793290825/XoT2Ei0p-4Wz8-1HCP7-Z3QKPWanbJSNoVEE52nNvrCpEZFYRidtd_SneIrGip2RsvHa
-"; // Replace with your webhook URL
+const webhookURL = "https://discord.com/api/webhooks/1333176484793290825/XoT2Ei0p-4Wz8-1HCP7-Z3QKPWanbJSNoVEE52nNvrCpEZFYRidtd_SneIrGip2RsvHa";
 
 // Start Monitoring
 document.getElementById("startMonitoring").addEventListener("click", () => {
@@ -47,14 +46,14 @@ function detectGameText() {
         console.log("Detected Text:", detectedText);
 
         // Detect shooting star information
-        const starRegex = /The star is visible in (.+?) and will land in (.+)/i;
+        const starRegex = /The star is visible in (.+?) and will land in (.+?) minutes\..*The star looks to be a size (\d+)/i;
         const starMatch = detectedText.match(starRegex);
 
         if (starMatch) {
-            const [_, location, time] = starMatch;
+            const [_, location, time, size] = starMatch;
             const world = detectCurrentWorld(detectedText); // Get the current world
             if (world) {
-                addStarData(world, location, time);
+                addStarData(world, location, time, size);
             }
         }
     }
@@ -76,8 +75,8 @@ function detectCurrentWorld(text) {
 }
 
 // Add star data and update UI
-function addStarData(world, location, time) {
-    stars.push({ world, location, time });
+function addStarData(world, location, time, size) {
+    stars.push({ world, location, time, size });
 
     // Sort stars by world number
     stars.sort((a, b) => a.world - b.world);
@@ -87,7 +86,7 @@ function addStarData(world, location, time) {
     starList.innerHTML = ""; // Clear existing list
     stars.forEach((star) => {
         const li = document.createElement("li");
-        li.textContent = `World: ${star.world}, Location: ${star.location}, Time: ${star.time}`;
+        li.textContent = `World: ${star.world}, Location: ${star.location}, Time: ${star.time} minutes, Size: ${star.size}`;
         starList.appendChild(li);
     });
 
@@ -95,7 +94,7 @@ function addStarData(world, location, time) {
     const discordMessage = stars
         .map(
             (star) =>
-                `🌟 World: ${star.world}, Location: ${star.location}, Landing in: ${star.time}`
+                `🌟 World: ${star.world}, Location: ${star.location}, Time: ${star.time} minutes, Size: ${star.size}`
         )
         .join("\n");
     sendToDiscord(discordMessage);
