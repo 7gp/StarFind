@@ -2,15 +2,32 @@ console.debug("App initialized");
 
 A1lib.identifyApp("appconfig.json");
 
-let stars = []; // Store detected star data
-let lastMessageID = null; // Store the last Discord message ID for editing
+let stars = [];
+let lastMessageID = null; // For editing Discord messages
 const webhookURL = "https://discord.com/api/webhooks/1333176484793290825/XoT2Ei0p-4Wz8-1HCP7-Z3QKPWanbJSNoVEE52nNvrCpEZFYRidtd_SneIrGip2RsvHa";
 
 const dialogReader = new DialogTextReader();
 
-// Start detecting dialog boxes immediately
-function detectDialog() {
+function detectRuneScape() {
+    if (!alt1.rsLinked) {
+        console.debug("RuneScape is not linked. Please link RuneScape to Alt1.");
+        return;
+    }
+
+    const rsBounds = {
+        x: alt1.rsX,
+        y: alt1.rsY,
+        width: alt1.rsWidth,
+        height: alt1.rsHeight,
+    };
+    console.debug("RuneScape client bounds detected:", rsBounds);
+
+    detectDialog(rsBounds);
+}
+
+function detectDialog(rsBounds) {
     console.debug("Checking for dialog...");
+
     if (!dialogReader.pos) {
         dialogReader.find();
         console.debug("Dialog reader initialized:", dialogReader.pos);
@@ -25,39 +42,23 @@ function detectDialog() {
 
         if (match) {
             const [_, location, time, size] = match;
-            const world = detectCurrentWorld(dialogText);
+            const world = alt1.currentWorld > 0 ? alt1.currentWorld : null;
 
             if (world) {
                 addStarData(world, location, time, size);
             } else {
-                console.debug("World not detected in the dialog.");
+                console.debug("World not detected.");
             }
         } else {
-            console.debug("No star-related text in the dialog.");
+            console.debug("No star-related text in dialog.");
         }
     } else {
         console.debug("No dialog detected.");
     }
 
-    setTimeout(detectDialog, 1000); // Keep polling for dialogs
+    setTimeout(() => detectDialog(rsBounds), 1000); // Poll every second
 }
 
-// Detect current world from dialog
-function detectCurrentWorld(text) {
-    const worldRegex = /RuneScape (\d+)/i;
-    const match = text.match(worldRegex);
-
-    if (match) {
-        const world = parseInt(match[1], 10);
-        console.debug("Detected world:", world);
-        return world;
-    }
-
-    console.debug("World not detected.");
-    return null;
-}
-
-// Add new star data to the list
 function addStarData(world, location, time, size) {
     console.debug("Adding star data:", { world, location, time, size });
 
@@ -75,7 +76,6 @@ function addStarData(world, location, time, size) {
     updateStarListUI();
 }
 
-// Update the list of stars in the app UI
 function updateStarListUI() {
     const starList = document.getElementById("stars");
     starList.innerHTML = "";
@@ -105,7 +105,6 @@ document.getElementById("sendToDiscord").addEventListener("click", () => {
     }
 });
 
-// Send a new message to Discord
 function sendNewDiscordMessage(content) {
     console.debug("Sending new message to Discord");
 
@@ -122,7 +121,6 @@ function sendNewDiscordMessage(content) {
         .catch((error) => console.error("Error sending Discord message:", error));
 }
 
-// Edit the existing message on Discord
 function editDiscordMessage(content) {
     console.debug("Editing existing Discord message");
 
@@ -144,8 +142,8 @@ function editDiscordMessage(content) {
 // Clear the star list
 document.getElementById("clearList").addEventListener("click", () => {
     console.debug("Clear list button clicked");
-    stars = []; // Clear the data
+    stars = [];
     updateStarListUI();
 });
 
-detectDialog(); // Start dialog detection on app load
+detectRuneScape();
