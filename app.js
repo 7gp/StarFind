@@ -1,15 +1,15 @@
-const webhookURL = "https://discord.com/api/webhooks/1333176484793290825/XoT2Ei0p-4Wz8-1HCP7-Z3QKPWanbJSNoVEE52nNvrCpEZFYRidtd_SneIrGip2RsvHa";
-let monitoring = false;
+A1lib.identifyApp("appconfig.json");
 
-// Start monitoring chat for portable telescope messages
+let stars = []; // Array to store star data
+let monitoring = false;
+const webhookURL = "https://discord.com/api/webhooks/1333176484793290825/XoT2Ei0p-4Wz8-1HCP7-Z3QKPWanbJSNoVEE52nNvrCpEZFYRidtd_SneIrGip2RsvHa
+"; // Replace with your webhook URL
+
+// Start Monitoring
 document.getElementById("startMonitoring").addEventListener("click", () => {
     console.log("Start Monitoring clicked");
-    if (!alt1 || !alt1.permissionPixel) {
-        alert("Please run this app in the Alt1 Toolkit with screen capture permissions enabled!");
-        return;
-    }
-
     monitoring = true;
+
     document.getElementById("startMonitoring").disabled = true;
     document.getElementById("stopMonitoring").disabled = false;
 
@@ -19,46 +19,89 @@ document.getElementById("startMonitoring").addEventListener("click", () => {
             return;
         }
 
-        const chatData = alt1.chatbox.read();
-        if (chatData && chatData.messages) {
-            chatData.messages.forEach((message) => {
-                // Detect portable telescope message
-                if (message.text.includes("The star is visible in") && message.text.includes("and will land in")) {
-                    displayTelescopeInfo(message.text);
-                }
-            });
-        }
+        detectGameText(); // Scan the entire screen for text
     }, 1000); // Poll every second
 });
 
-// Stop monitoring chat
+// Stop Monitoring
 document.getElementById("stopMonitoring").addEventListener("click", () => {
-    console.log("Stop Monitoring clicked");
+    console.log("Monitoring stopped");
     monitoring = false;
+
     document.getElementById("startMonitoring").disabled = false;
     document.getElementById("stopMonitoring").disabled = true;
 });
 
-// Process and display telescope info
-function displayTelescopeInfo(chatMessage) {
-    const telescopeRegex = /The star is visible in (.+?) and will land in (.+)/i;
-    const match = chatMessage.match(telescopeRegex);
+// Detect text across the entire screen
+function detectGameText() {
+    const gameSize = alt1.getAppSize(); // Get the full RuneScape client dimensions
+    const image = alt1.captureRect({
+        x: 0,
+        y: 0,
+        width: gameSize.width,
+        height: gameSize.height,
+    });
 
-    if (match) {
-        const [_, location, time] = match;
+    if (image) {
+        const detectedText = alt1.ocr.read(image);
+        console.log("Detected Text:", detectedText);
 
-        // Display the info on the page
-        const starList = document.getElementById("stars");
-        const li = document.createElement("li");
-        li.textContent = `Location: ${location}, Time: ${time}`;
-        starList.appendChild(li);
+        // Detect shooting star information
+        const starRegex = /The star is visible in (.+?) and will land in (.+)/i;
+        const starMatch = detectedText.match(starRegex);
 
-        // Optional: Send the information to Discord
-        sendToDiscord(`🌟 Shooting Star Alert 🌟\nLocation: ${location}\nLanding in: ${time}`);
+        if (starMatch) {
+            const [_, location, time] = starMatch;
+            const world = detectCurrentWorld(detectedText); // Get the current world
+            if (world) {
+                addStarData(world, location, time);
+            }
+        }
     }
 }
 
-// Send telescope info to Discord
+// Detect the current RuneScape world
+function detectCurrentWorld(text) {
+    const worldRegex = /RuneScape (\d+)/i;
+    const worldMatch = text.match(worldRegex);
+
+    if (worldMatch) {
+        const world = parseInt(worldMatch[1], 10);
+        console.log("Detected World:", world);
+        return world;
+    }
+
+    console.log("World not detected.");
+    return null;
+}
+
+// Add star data and update UI
+function addStarData(world, location, time) {
+    stars.push({ world, location, time });
+
+    // Sort stars by world number
+    stars.sort((a, b) => a.world - b.world);
+
+    // Update the UI
+    const starList = document.getElementById("stars");
+    starList.innerHTML = ""; // Clear existing list
+    stars.forEach((star) => {
+        const li = document.createElement("li");
+        li.textContent = `World: ${star.world}, Location: ${star.location}, Time: ${star.time}`;
+        starList.appendChild(li);
+    });
+
+    // Send sorted data to Discord
+    const discordMessage = stars
+        .map(
+            (star) =>
+                `🌟 World: ${star.world}, Location: ${star.location}, Landing in: ${star.time}`
+        )
+        .join("\n");
+    sendToDiscord(discordMessage);
+}
+
+// Send data to Discord
 function sendToDiscord(message) {
     fetch(webhookURL, {
         method: "POST",
