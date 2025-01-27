@@ -6,7 +6,5 @@
   "iconUrl": "./icon.png",
   "defaultWidth": 400,
   "defaultHeight": 600,
-  "minWidth": 300,
-  "minHeight": 200,
-  "permissions": "pixel,overlay"
+  "permissions": "pixel,gamestate,overlay"
 }
