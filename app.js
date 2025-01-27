@@ -1,5 +1,11 @@
 console.debug("App initialized");
 
+// Ensure A1lib is available
+if (typeof A1lib === "undefined") {
+    console.error("A1lib is not defined. Ensure a1lib.js is included.");
+    throw new Error("A1lib is not defined");
+}
+
 A1lib.identifyApp("appconfig.json");
 
 let stars = [];
