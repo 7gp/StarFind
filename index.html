@@ -9,7 +9,6 @@
     <link rel="stylesheet" href="styles.css">
     <script>
         if (window.alt1) {
-            console.log("Identifying app with Alt1...");
             alt1.identifyAppUrl("./appconfig.json");
         }
     </script>
@@ -18,8 +17,8 @@
     <div id="app">
         <h1>StarFind</h1>
         <p>Detect and report shooting stars automatically from RuneScape!</p>
-        <button id="startMonitoring">Start Monitoring</button>
-        <button id="stopMonitoring" disabled>Stop Monitoring</button>
+        <button id="sendToDiscord">Send to Discord</button>
+        <button id="clearList">Clear List</button>
         <div id="starList">
             <h2>Detected Stars</h2>
             <ul id="stars"></ul>
