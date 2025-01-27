@@ -1,4 +1,4 @@
-console.log("app.js loaded successfully"); // Confirm the script is loaded
+console.debug("app.js loaded successfully"); // Confirm the script is loaded
 
 A1lib.identifyApp("appconfig.json"); // Identify the app
 
@@ -8,7 +8,7 @@ const webhookURL = "https://discord.com/api/webhooks/1333176484793290825/XoT2Ei0
 let dialogReader = new DialogTextReader();
 
 document.getElementById("startMonitoring").addEventListener("click", () => {
-    console.log("Start Monitoring button clicked");
+    console.debug("Start Monitoring button clicked");
     monitoring = true;
 
     document.getElementById("startMonitoring").disabled = true;
@@ -17,7 +17,7 @@ document.getElementById("startMonitoring").addEventListener("click", () => {
     const monitorInterval = setInterval(() => {
         if (!monitoring) {
             clearInterval(monitorInterval);
-            console.log("Monitoring stopped.");
+            console.debug("Monitoring stopped.");
             return;
         }
 
@@ -26,7 +26,7 @@ document.getElementById("startMonitoring").addEventListener("click", () => {
 });
 
 document.getElementById("stopMonitoring").addEventListener("click", () => {
-    console.log("Stop Monitoring button clicked");
+    console.debug("Stop Monitoring button clicked");
     monitoring = false;
 
     document.getElementById("startMonitoring").disabled = false;
@@ -34,15 +34,15 @@ document.getElementById("stopMonitoring").addEventListener("click", () => {
 });
 
 function detectDialog() {
-    console.log("Checking for dialog...");
+    console.debug("Checking for dialog...");
     if (!dialogReader.pos) {
         dialogReader.find();
-        console.log("Dialog reader initialized:", dialogReader.pos);
+        console.debug("Dialog reader initialized:", dialogReader.pos);
     }
 
     const dialogText = dialogReader.read();
     if (dialogText) {
-        console.log("Dialog detected:", dialogText);
+        console.debug("Dialog detected:", dialogText);
 
         // Use regex to extract shooting star details
         const starRegex = /The star is visible in (.+?) and will land in (.+?) minutes\..*The star looks to be a size (\d+)/i;
@@ -53,34 +53,35 @@ function detectDialog() {
             const world = detectCurrentWorld(dialogText);
             if (world) {
                 addStarData(world, location, time, size);
+                drawRectangleAroundDialog(); // Draw a rectangle
             } else {
-                console.log("World not detected in the dialog.");
+                console.debug("World not detected in the dialog.");
             }
         } else {
-            console.log("No shooting star information in the dialog.");
+            console.debug("No shooting star information in the dialog.");
         }
     } else {
-        console.log("No dialog detected.");
+        console.debug("No dialog detected.");
     }
 }
 
 function detectCurrentWorld(text) {
-    console.log("Detecting world...");
+    console.debug("Detecting world...");
     const worldRegex = /RuneScape (\d+)/i;
     const worldMatch = text.match(worldRegex);
 
     if (worldMatch) {
         const world = parseInt(worldMatch[1], 10);
-        console.log("Detected World:", world);
+        console.debug("Detected World:", world);
         return world;
     }
 
-    console.log("World not detected in the dialog.");
+    console.debug("World not detected in the dialog.");
     return null;
 }
 
 function addStarData(world, location, time, size) {
-    console.log("Adding star data:", { world, location, time, size });
+    console.debug("Adding star data:", { world, location, time, size });
 
     stars.push({ world, location, time, size });
     stars.sort((a, b) => a.world - b.world);
@@ -103,7 +104,7 @@ function addStarData(world, location, time, size) {
 }
 
 function sendToDiscord(message) {
-    console.log("Sending message to Discord:", message);
+    console.debug("Sending message to Discord:", message);
 
     fetch(webhookURL, {
         method: "POST",
@@ -114,9 +115,25 @@ function sendToDiscord(message) {
             if (!response.ok) {
                 throw new Error(`Failed to send webhook: ${response.statusText}`);
             }
-            console.log("Message sent to Discord:", message);
+            console.debug("Message sent to Discord:", message);
         })
         .catch((error) => {
             console.error("Error sending webhook:", error.message);
         });
+}
+
+// Draw rectangle around detected dialog box
+function drawRectangleAroundDialog() {
+    if (dialogReader.pos && dialogReader.pos.box) {
+        console.debug("Drawing rectangle around dialog box:", dialogReader.pos.box);
+        try {
+            const box = dialogReader.pos.box.rect;
+            const color = A1lib.mixColor(255, 0, 0); // Red rectangle
+            alt1.overLayRect(color, box.x, box.y, box.width, box.height, 3000, 3); // 3 seconds
+        } catch (err) {
+            console.error("Failed to draw rectangle:", err);
+        }
+    } else {
+        console.debug("Dialog position not found, skipping rectangle.");
+    }
 }
