@@ -4,6 +4,8 @@ let stars = []; // Array to store star data
 let monitoring = false;
 const webhookURL = "https://discord.com/api/webhooks/1333176484793290825/XoT2Ei0p-4Wz8-1HCP7-Z3QKPWanbJSNoVEE52nNvrCpEZFYRidtd_SneIrGip2RsvHa";
 
+console.log("App loaded, monitoring ready."); // App initialization log
+
 // Start Monitoring
 document.getElementById("startMonitoring").addEventListener("click", () => {
     console.log("Start Monitoring clicked");
@@ -15,16 +17,18 @@ document.getElementById("startMonitoring").addEventListener("click", () => {
     const monitorInterval = setInterval(() => {
         if (!monitoring) {
             clearInterval(monitorInterval);
+            console.log("Monitoring stopped.");
             return;
         }
 
+        console.log("Scanning the screen...");
         detectGameText(); // Scan the entire screen for text
     }, 1000); // Poll every second
 });
 
 // Stop Monitoring
 document.getElementById("stopMonitoring").addEventListener("click", () => {
-    console.log("Monitoring stopped");
+    console.log("Stop Monitoring clicked");
     monitoring = false;
 
     document.getElementById("startMonitoring").disabled = false;
@@ -42,6 +46,7 @@ function detectGameText() {
     });
 
     if (image) {
+        console.log("Captured screen successfully.");
         const detectedText = alt1.ocr.read(image);
         console.log("Detected Text:", detectedText);
 
@@ -50,12 +55,19 @@ function detectGameText() {
         const starMatch = detectedText.match(starRegex);
 
         if (starMatch) {
+            console.log("Star Match Found:", starMatch);
             const [_, location, time, size] = starMatch;
             const world = detectCurrentWorld(detectedText); // Get the current world
             if (world) {
                 addStarData(world, location, time, size);
+            } else {
+                console.log("World not detected in the text.");
             }
+        } else {
+            console.log("No star-related text detected.");
         }
+    } else {
+        console.error("Failed to capture screen.");
     }
 }
 
@@ -70,7 +82,7 @@ function detectCurrentWorld(text) {
         return world;
     }
 
-    console.log("World not detected.");
+    console.log("World not detected in the text.");
     return null;
 }
 
@@ -89,6 +101,8 @@ function addStarData(world, location, time, size) {
         li.textContent = `World: ${star.world}, Location: ${star.location}, Time: ${star.time} minutes, Size: ${star.size}`;
         starList.appendChild(li);
     });
+
+    console.log("Updated UI with star data:", stars);
 
     // Send sorted data to Discord
     const discordMessage = stars
